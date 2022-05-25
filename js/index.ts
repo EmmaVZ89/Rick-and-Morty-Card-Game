@@ -25,8 +25,57 @@ sonidoExito.volume = 0.03;
 sonidoExito.src = "exito.mp3";
 
 let sonidoFalla = new Audio();
-sonidoFalla.volume = 0.0095;
+sonidoFalla.volume = 0.01;
 sonidoFalla.src = "error.mp3";
+
+
+
+let tiempoNivel: any;
+let cartasNivel : number = 0;
+let puntuacionNivel : number = 0;
+let plusPuntuacion : number = 1;
+let idInterval: any;
+//##################################################################
+document.addEventListener("DOMContentLoaded", () => {
+  const $tiempoTranscurrido: Element | null = document.querySelector("#tiempoCronometro");
+
+  let diferenciaTemporal = 0;
+  let tiempoInicio: any;
+  let segundos: any;
+
+  function agregarCeroSiEsNecesario(valor: any) {
+    if (valor < 10) {
+      return "0" + valor;
+    } else {
+      return "" + valor;
+    }
+  }
+
+  function milisegundosAMinutosYSegundos(milisegundos: any) {
+    const minutos = parseInt(milisegundos / 1000 / 60);
+    milisegundos -= minutos * 60 * 1000;
+    segundos = milisegundos / 1000;
+    return `${agregarCeroSiEsNecesario(minutos)}:${agregarCeroSiEsNecesario(segundos.toFixed(2))}`;
+  }
+
+  function iniciar() {
+    const ahora = new Date();
+    tiempoInicio = new Date(ahora.getTime() - diferenciaTemporal);
+    clearInterval(idInterval);
+    idInterval = setInterval(refrescarTiempo, 25);
+  }
+
+  function refrescarTiempo() {
+    const ahora = new Date();
+    const diferencia = ahora.getTime() - tiempoInicio.getTime();
+    if ($tiempoTranscurrido) {
+      $tiempoTranscurrido.textContent = milisegundosAMinutosYSegundos(diferencia);
+      tiempoNivel = $tiempoTranscurrido.textContent;
+    }
+  }
+  iniciar();
+});
+//##################################################################
 
 document.getElementsByName("cartaFrontA").forEach((cartaFront) => {
   cartaFront.addEventListener("click", () => {
@@ -78,6 +127,7 @@ document.getElementsByName("cartaFrontA").forEach((cartaFront) => {
           idA = 0;
           idB = -1;
           flag--;
+          plusPuntuacion = 1;
           if (flag < 0) {
             flag = 0;
           }
@@ -101,6 +151,7 @@ document.getElementsByName("cartaFrontA").forEach((cartaFront) => {
           idA = 0;
           idB = -1;
           flag--;
+          plusPuntuacion = 1;
           if (flag < 0) {
             flag = 0;
           }
@@ -108,11 +159,26 @@ document.getElementsByName("cartaFrontA").forEach((cartaFront) => {
       }
 
       if (idA == idB) {
+        cartasNivel++;
         sonidoExito.pause();
         sonidoExito.currentTime = 0;
         if (sonidoExito.paused) {
           sonidoExito.play();
         }
+
+        if(plusPuntuacion == 1) {
+          puntuacionNivel += 100;
+          plusPuntuacion++;
+        } else if(plusPuntuacion == 2) {
+          puntuacionNivel += 100 * 1.10;
+          plusPuntuacion++;
+        } else if(plusPuntuacion == 3) {
+          puntuacionNivel += 100 * 1.15;
+          plusPuntuacion++;
+        } else {
+          puntuacionNivel += 100 * 1.30;
+        }
+        console.log(puntuacionNivel);
 
         clearTimeout(idTimeA);
         clearTimeout(idTimeB);
@@ -122,6 +188,14 @@ document.getElementsByName("cartaFrontA").forEach((cartaFront) => {
         aux_cartaBackB = undefined;
         flag = 0;
         idA = 0;
+
+        if(cartasNivel == 10) {
+          clearInterval(idInterval);
+          console.log("Felicitaciones!!");
+          console.log("Cartas: ", cartasNivel);
+          console.log("Puntuacion: ", puntuacionNivel);
+        }
+
       } else {
         if (flag == 2) {
           sonidoFalla.pause();
@@ -182,6 +256,7 @@ document.getElementsByName("cartaFrontB").forEach((cartaFront) => {
           idA = 0;
           idB = -1;
           flag--;
+          plusPuntuacion = 1;
           if (flag < 0) {
             flag = 0;
           }
@@ -204,6 +279,7 @@ document.getElementsByName("cartaFrontB").forEach((cartaFront) => {
           idA = 0;
           idB = -1;
           flag--;
+          plusPuntuacion = 1;
           if (flag < 0) {
             flag = 0;
           }
@@ -211,11 +287,27 @@ document.getElementsByName("cartaFrontB").forEach((cartaFront) => {
       }
 
       if (idA == idB) {
+        cartasNivel++;
         sonidoExito.pause();
         sonidoExito.currentTime = 0;
         if (sonidoExito.paused) {
           sonidoExito.play();
         }
+
+        if(plusPuntuacion == 1) {
+          puntuacionNivel += 100;
+          plusPuntuacion++;
+        } else if(plusPuntuacion == 2) {
+          puntuacionNivel += 100 * 1.10;
+          plusPuntuacion++;
+        } else if(plusPuntuacion == 3) {
+          puntuacionNivel += 100 * 1.15;
+          plusPuntuacion++;
+        } else {
+          puntuacionNivel += 100 * 1.30;
+        }
+        console.log(puntuacionNivel);
+
         clearTimeout(idTimeA);
         clearTimeout(idTimeB);
         aux_cartaFrontA = undefined;
@@ -224,6 +316,14 @@ document.getElementsByName("cartaFrontB").forEach((cartaFront) => {
         aux_cartaBackB = undefined;
         flag = 0;
         idB = -1;
+
+        if(cartasNivel == 10) {
+          clearInterval(idInterval);
+          console.log("Felicitaciones!!");
+          console.log("Cartas: ", cartasNivel);
+          console.log("Puntuacion: ", puntuacionNivel);
+        }
+
       } else {
         if (flag == 2) {
           sonidoFalla.pause();

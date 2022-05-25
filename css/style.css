@@ -4,19 +4,28 @@
     box-sizing: border-box;
 }
 
-body {
+.cronometro {
+    text-align: center;
+    color: #fff;
+}
+
+.usuario {
+    color: #fff;
+}
+
+.contenedor-cartas {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    background: #000
 }
 
 .tarjeta {
     position: relative;
-    width: 150px;
-    height: 150px;
-    margin: 10px;
+    width: 7rem;
+    height: 8rem;
+    margin: 0.5rem;
 }
 
 .tarjeta .face {
@@ -28,12 +37,11 @@ body {
     border-radius: 10px;
     overflow: hidden;
     transition: .5s;
-
 }
 
 .tarjeta .front {
     transform: perspective(600px) rotateY(0deg);
-    box-shadow: 0 5px 10px #000;
+    box-shadow: 0 5px 10px rgb(255, 252, 252);
 }
 
 .tarjeta .front img {
@@ -41,6 +49,7 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border: 2px dashed rgb(0, 255, 21) ;
 }
 
 .tarjeta .back {
@@ -51,7 +60,7 @@ body {
     flex-direction: column;
     justify-content: space-between;
     text-align: center;
-    box-shadow: 0 5px 10px #000;
+    box-shadow: 0 5px 10px rgb(255, 255, 255);
 }
 
 .tarjeta .back img {
@@ -61,12 +70,13 @@ body {
     object-fit: cover;
 }
 
-.tarjeta .back h3 {
+.tarjeta .back p {
     position: absolute;
     bottom: 0;
     width: 100%;
-    height:  45px;
-    line-height: 45px;
+    height:  1.5rem;
+    margin: 0;
+    /* line-height: 45px; */
     color: #fff;
     background: rgba(0, 0, 0, 0.5);
     text-align: center;
@@ -74,11 +84,9 @@ body {
 
 
 .tarjeta:hover .front {
-    /* transform: perspective(600px) rotateY(180deg); */
     cursor: pointer;
 }
 
 .tarjeta:hover .back {
-    /* transform: perspective(600px) rotateY(360deg); */
     cursor: pointer;
 }
