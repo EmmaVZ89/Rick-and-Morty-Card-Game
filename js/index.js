@@ -24,6 +24,9 @@ sonidoExito.src = "exito.mp3";
 let sonidoFalla = new Audio();
 sonidoFalla.volume = 0.01;
 sonidoFalla.src = "error.mp3";
+let inputJson = document.getElementById("jsonUsuario");
+let usuarioJson = JSON.parse(inputJson.value);
+let xhttp = new XMLHttpRequest();
 let tiempoNivel;
 let cartasNivel = 0;
 let puntuacionNivel = 0;
@@ -155,7 +158,7 @@ document.getElementsByName("cartaFrontA").forEach((cartaFront) => {
                     plusPuntuacion++;
                 }
                 else if (plusPuntuacion == 2) {
-                    puntuacionNivel += 100 * 1.10;
+                    puntuacionNivel += 100 * 1.1;
                     plusPuntuacion++;
                 }
                 else if (plusPuntuacion == 3) {
@@ -163,9 +166,8 @@ document.getElementsByName("cartaFrontA").forEach((cartaFront) => {
                     plusPuntuacion++;
                 }
                 else {
-                    puntuacionNivel += 100 * 1.30;
+                    puntuacionNivel += 100 * 1.3;
                 }
-                console.log(puntuacionNivel);
                 clearTimeout(idTimeA);
                 clearTimeout(idTimeB);
                 aux_cartaFrontA = undefined;
@@ -176,9 +178,9 @@ document.getElementsByName("cartaFrontA").forEach((cartaFront) => {
                 idA = 0;
                 if (cartasNivel == 10) {
                     clearInterval(idInterval);
-                    console.log("Felicitaciones!!");
-                    console.log("Cartas: ", cartasNivel);
-                    console.log("Puntuacion: ", puntuacionNivel);
+                    usuarioJson.puntajes[0] = puntuacionNivel;
+                    usuarioJson.tiempos[0] = tiempoNivel;
+                    guardarUsuario(usuarioJson);
                 }
             }
             else {
@@ -282,7 +284,7 @@ document.getElementsByName("cartaFrontB").forEach((cartaFront) => {
                     plusPuntuacion++;
                 }
                 else if (plusPuntuacion == 2) {
-                    puntuacionNivel += 100 * 1.10;
+                    puntuacionNivel += 100 * 1.1;
                     plusPuntuacion++;
                 }
                 else if (plusPuntuacion == 3) {
@@ -290,9 +292,8 @@ document.getElementsByName("cartaFrontB").forEach((cartaFront) => {
                     plusPuntuacion++;
                 }
                 else {
-                    puntuacionNivel += 100 * 1.30;
+                    puntuacionNivel += 100 * 1.3;
                 }
-                console.log(puntuacionNivel);
                 clearTimeout(idTimeA);
                 clearTimeout(idTimeB);
                 aux_cartaFrontA = undefined;
@@ -303,9 +304,9 @@ document.getElementsByName("cartaFrontB").forEach((cartaFront) => {
                 idB = -1;
                 if (cartasNivel == 10) {
                     clearInterval(idInterval);
-                    console.log("Felicitaciones!!");
-                    console.log("Cartas: ", cartasNivel);
-                    console.log("Puntuacion: ", puntuacionNivel);
+                    usuarioJson.puntajes[0] = puntuacionNivel;
+                    usuarioJson.tiempos[0] = tiempoNivel;
+                    guardarUsuario(usuarioJson);
                 }
             }
             else {
@@ -320,4 +321,22 @@ document.getElementsByName("cartaFrontB").forEach((cartaFront) => {
         }
     });
 });
+// FUNCIONES AJAX
+// ###################################################################################################
+// ###################################################################################################
+function guardarUsuario(usuario) {
+    xhttp.open("POST", "./backend/GuardarUsuario.php", true);
+    let form = new FormData();
+    form.append("usuarioJson", JSON.stringify(usuario));
+    xhttp.send(form);
+    xhttp.onreadystatechange = () => {
+        if (xhttp.readyState == 4 && xhttp.status == 200) {
+            // let contenedor = document.getElementById("respuesta");
+            let respuesta = JSON.parse(xhttp.responseText);
+            console.log(respuesta.mensaje);
+        }
+    };
+}
+// ###################################################################################################
+// ###################################################################################################
 //# sourceMappingURL=index.js.map

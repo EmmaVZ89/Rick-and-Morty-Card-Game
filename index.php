@@ -32,12 +32,15 @@ require_once("./Usuario.php");
 <?php
 if (isset($_COOKIE["cookie_usuario"])) {
     session_start();
-    $_SESSION["usuario"] = $_COOKIE["cookie_usuario"];
+    $obj = json_decode($_COOKIE["cookie_usuario"]);
+    $usuario = Usuario::TraerUsuarioJSON($obj->id);
+    $_SESSION["usuario"] = isset($usuario) ? $usuario->ToJSON() : null;
     header("Location: game.php");
 } else if (isset($_GET["nombre"])) {
     $nombre = isset($_GET["nombre"]) ? $_GET["nombre"] : null;
     if ($nombre) {
-        $usuario = new Usuario($nombre);
+        $id = date("dmhis");
+        $usuario = new Usuario($id, $nombre);
         setcookie("cookie_usuario", $usuario->ToJSON(), time() + 5184000, "/");
         session_start();
         $_SESSION["usuario"] = $_COOKIE["cookie_usuario"];

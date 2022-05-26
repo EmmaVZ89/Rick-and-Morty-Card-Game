@@ -28,12 +28,14 @@ let sonidoFalla = new Audio();
 sonidoFalla.volume = 0.01;
 sonidoFalla.src = "error.mp3";
 
-
+let inputJson = <HTMLInputElement> document.getElementById("jsonUsuario");
+let usuarioJson = JSON.parse(inputJson.value);
+let xhttp: XMLHttpRequest = new XMLHttpRequest();
 
 let tiempoNivel: any;
-let cartasNivel : number = 0;
-let puntuacionNivel : number = 0;
-let plusPuntuacion : number = 1;
+let cartasNivel: number = 0;
+let puntuacionNivel: number = 0;
+let plusPuntuacion: number = 1;
 let idInterval: any;
 //##################################################################
 document.addEventListener("DOMContentLoaded", () => {
@@ -166,19 +168,18 @@ document.getElementsByName("cartaFrontA").forEach((cartaFront) => {
           sonidoExito.play();
         }
 
-        if(plusPuntuacion == 1) {
+        if (plusPuntuacion == 1) {
           puntuacionNivel += 100;
           plusPuntuacion++;
-        } else if(plusPuntuacion == 2) {
-          puntuacionNivel += 100 * 1.10;
+        } else if (plusPuntuacion == 2) {
+          puntuacionNivel += 100 * 1.1;
           plusPuntuacion++;
-        } else if(plusPuntuacion == 3) {
+        } else if (plusPuntuacion == 3) {
           puntuacionNivel += 100 * 1.15;
           plusPuntuacion++;
         } else {
-          puntuacionNivel += 100 * 1.30;
+          puntuacionNivel += 100 * 1.3;
         }
-        console.log(puntuacionNivel);
 
         clearTimeout(idTimeA);
         clearTimeout(idTimeB);
@@ -189,13 +190,12 @@ document.getElementsByName("cartaFrontA").forEach((cartaFront) => {
         flag = 0;
         idA = 0;
 
-        if(cartasNivel == 10) {
+        if (cartasNivel == 10) {
           clearInterval(idInterval);
-          console.log("Felicitaciones!!");
-          console.log("Cartas: ", cartasNivel);
-          console.log("Puntuacion: ", puntuacionNivel);
+          usuarioJson.puntajes[0] = puntuacionNivel;
+          usuarioJson.tiempos[0] = tiempoNivel;
+          guardarUsuario(usuarioJson);
         }
-
       } else {
         if (flag == 2) {
           sonidoFalla.pause();
@@ -294,19 +294,18 @@ document.getElementsByName("cartaFrontB").forEach((cartaFront) => {
           sonidoExito.play();
         }
 
-        if(plusPuntuacion == 1) {
+        if (plusPuntuacion == 1) {
           puntuacionNivel += 100;
           plusPuntuacion++;
-        } else if(plusPuntuacion == 2) {
-          puntuacionNivel += 100 * 1.10;
+        } else if (plusPuntuacion == 2) {
+          puntuacionNivel += 100 * 1.1;
           plusPuntuacion++;
-        } else if(plusPuntuacion == 3) {
+        } else if (plusPuntuacion == 3) {
           puntuacionNivel += 100 * 1.15;
           plusPuntuacion++;
         } else {
-          puntuacionNivel += 100 * 1.30;
+          puntuacionNivel += 100 * 1.3;
         }
-        console.log(puntuacionNivel);
 
         clearTimeout(idTimeA);
         clearTimeout(idTimeB);
@@ -317,13 +316,12 @@ document.getElementsByName("cartaFrontB").forEach((cartaFront) => {
         flag = 0;
         idB = -1;
 
-        if(cartasNivel == 10) {
+        if (cartasNivel == 10) {
           clearInterval(idInterval);
-          console.log("Felicitaciones!!");
-          console.log("Cartas: ", cartasNivel);
-          console.log("Puntuacion: ", puntuacionNivel);
+          usuarioJson.puntajes[0] = puntuacionNivel;
+          usuarioJson.tiempos[0] = tiempoNivel;
+          guardarUsuario(usuarioJson);
         }
-
       } else {
         if (flag == 2) {
           sonidoFalla.pause();
@@ -336,3 +334,22 @@ document.getElementsByName("cartaFrontB").forEach((cartaFront) => {
     }
   });
 });
+
+// FUNCIONES AJAX
+// ###################################################################################################
+// ###################################################################################################
+function guardarUsuario(usuario: any) {
+  xhttp.open("POST", "./backend/GuardarUsuario.php", true);
+  let form: FormData = new FormData();
+  form.append("usuarioJson", JSON.stringify(usuario));
+  xhttp.send(form);
+  xhttp.onreadystatechange = () => {
+    if (xhttp.readyState == 4 && xhttp.status == 200) {
+      // let contenedor = document.getElementById("respuesta");
+      let respuesta = JSON.parse(xhttp.responseText);
+      console.log(respuesta.mensaje);
+    }
+  };
+}
+// ###################################################################################################
+// ###################################################################################################

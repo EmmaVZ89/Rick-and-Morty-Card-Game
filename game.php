@@ -1,3 +1,11 @@
+<?php
+
+namespace Zelarayan;
+
+require_once("./Usuario.php");
+
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -15,7 +23,9 @@
     <?php
     session_start();
     if (isset($_SESSION["usuario"])) {
-        $usuario = json_decode($_SESSION["usuario"]);
+        $obj = json_decode($_SESSION["usuario"]);
+        $usuario = Usuario::TraerUsuarioJSON($obj->id);
+        $_SESSION["usuario"] = isset($usuario) ? $usuario->ToJSON() : null;
     } else {
         header("Location: index.php");
     }
@@ -26,6 +36,7 @@
     <?php
     echo "<h3 class='usuario'>Bienvenido " . $usuario->nombre . "</h3>";
     ?>
+    <input type="hidden" id="jsonUsuario" value='<?php echo $_SESSION["usuario"]?>'>
     <div class="container contenedor-cartas">
         <?php
         $URL = "https://rickandmortyapi.com/api/character";
@@ -74,6 +85,7 @@
         }
         ?>
     </div>
+    <div id="respuesta"></div>
 </body>
 
 </html>
