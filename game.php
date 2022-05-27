@@ -24,7 +24,7 @@ require_once("./Usuario.php");
     session_start();
     if (isset($_SESSION["usuario"])) {
         $obj = json_decode($_SESSION["usuario"]);
-        $usuario = Usuario::TraerUsuarioJSON($obj->id);
+        $usuario = Usuario::TraerUsuarioJSON($obj->id, "./backend/archivos/usuarios.json");
         $_SESSION["usuario"] = isset($usuario) ? $usuario->ToJSON() : null;
     } else {
         header("Location: index.php");
@@ -40,9 +40,17 @@ require_once("./Usuario.php");
     <div class="container contenedor-cartas">
         <?php
         $URL = "https://rickandmortyapi.com/api/character";
+        $URL2 = "https://rickandmortyapi.com/api/character?page=2";
         $json = file_get_contents($URL);
         $datos = json_decode($json);
-        $array_personajes = $datos->results;
+        $json2 = file_get_contents($URL2);
+        $datos2 = json_decode($json2);
+        
+        $array_personajes1 = $datos->results;
+        $array_personajes2 = $datos2->results;
+        shuffle($array_personajes1);
+        shuffle($array_personajes2);
+        $array_personajes = array_merge($array_personajes1, $array_personajes2);
         shuffle($array_personajes);
         $array_10Personajes = array_slice($array_personajes, 0, 10);
         $array_10Personajes = array_merge($array_10Personajes, $array_10Personajes);
@@ -85,7 +93,7 @@ require_once("./Usuario.php");
         }
         ?>
     </div>
-    <div id="respuesta"></div>
+    <div id="contenedorTablaPuntajes" class="tabla-puntajes"></div>
 </body>
 
 </html>

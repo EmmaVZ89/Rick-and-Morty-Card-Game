@@ -90,3 +90,7 @@
 .tarjeta:hover .back {
     cursor: pointer;
 }
+
+.tabla-puntajes {
+    color: white;
+}

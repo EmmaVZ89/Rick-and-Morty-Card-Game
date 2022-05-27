@@ -9,9 +9,7 @@ $usuarioJson = isset($_POST["usuarioJson"]) ? $_POST["usuarioJson"] : null;
 if ($usuarioJson) {
     $obj = json_decode($usuarioJson);
     $usuario = new Usuario($obj->id, $obj->nombre, $obj->nivel, $obj->puntajes, $obj->tiempos);
-    if (Usuario::ValidarUsuario($usuario->id)) {
-        echo Usuario::ModificarUsuario($usuario);
-    } else {
-        echo $usuario->GuardarUsuario();
+    if (Usuario::ValidarUsuario($usuario->id, "./archivos/usuarios.json")) {
+        echo Usuario::ModificarUsuario($usuario, "./archivos/usuarios.json");
     }
 }

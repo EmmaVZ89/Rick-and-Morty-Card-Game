@@ -31,12 +31,12 @@ class Usuario
         return json_encode($this);
     }
 
-    public function GuardarUsuario(): string
+    public function GuardarUsuario(string $ruta): string
     {
         $exito = false;
         $mensaje = "No se pudo guardar el Usuario";
         //ABRO EL ARCHIVO
-        $ar = fopen("./archivos/usuarios.json", "a"); //A - append
+        $ar = fopen($ruta, "a"); //A - append
         //ESCRIBO EN EL ARCHIVO CON FORMATO: $this->ToJSON()
         $cant = fwrite($ar, "{$this->ToJSON()},\r\n");
         if ($cant > 0) {
@@ -52,12 +52,13 @@ class Usuario
         return json_encode($retorno);
     }
 
-    public static function TraerUsuariosJSON(): array
+    public static function TraerUsuariosJSON($ruta): array
     {
         $array_usuarios = array();
 
         //ABRO EL ARCHIVO
-        $ar = fopen("./archivos/usuarios.json", "r");
+        // "./archivos/usuarios.json"
+        $ar = fopen($ruta, "r");
         $contenido = "";
         //LEO LINEA X LINEA DEL ARCHIVO 
         while (!feof($ar)) {
@@ -79,11 +80,11 @@ class Usuario
         return $array_usuarios;
     }
 
-    public static function TraerUsuarioJSON($id)
+    public static function TraerUsuarioJSON($id, $ruta)
     {
         $usuario_retorno = null;
         //ABRO EL ARCHIVO
-        $ar = fopen("./backend/archivos/usuarios.json", "r");
+        $ar = fopen($ruta, "r");
         $contenido = "";
         //LEO LINEA X LINEA DEL ARCHIVO 
         while (!feof($ar)) {
@@ -108,11 +109,11 @@ class Usuario
         return $usuario_retorno;
     }
 
-    public static function ValidarUsuario(string $id): bool
+    public static function ValidarUsuario(string $id, $ruta): bool
     {
         $retorno = false;
         //ABRO EL ARCHIVO
-        $ar = fopen("./archivos/usuarios.json", "r");
+        $ar = fopen($ruta, "r");
         $contenido = "";
         //LEO LINEA X LINEA DEL ARCHIVO 
         while (!feof($ar)) {
@@ -137,13 +138,13 @@ class Usuario
         return $retorno;
     }
 
-    public static function ModificarUsuario($usuarioMod): string
+    public static function ModificarUsuario(Usuario $usuarioMod, $ruta): string
     {
         $exito = false;
         $mensaje = "No se pudo modificar el usuario";
         $array_usuarios = array();
         //ABRO EL ARCHIVO
-        $ar = fopen("./archivos/usuarios.json", "r");
+        $ar = fopen($ruta, "r");
         $contenido = "";
         //LEO LINEA X LINEA DEL ARCHIVO 
         while (!feof($ar)) {
@@ -168,7 +169,7 @@ class Usuario
             }
         }
 
-        $ar = fopen("./archivos/usuarios.json", "w");
+        $ar = fopen($ruta, "w");
         //ESCRIBO EN EL ARCHIVO
         foreach ($array_usuarios as $item) {
             fwrite($ar, $item);
@@ -178,4 +179,7 @@ class Usuario
 
         return json_encode(array("exito" => $exito, "mensaje" => $mensaje));
     }
+
+
+    //##########################################################################
 }

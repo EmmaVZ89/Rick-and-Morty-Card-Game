@@ -34,9 +34,12 @@ let xhttp: XMLHttpRequest = new XMLHttpRequest();
 
 let tiempoNivel: any;
 let cartasNivel: number = 0;
+let aciertos : number = 10;
 let puntuacionNivel: number = 0;
 let plusPuntuacion: number = 1;
 let idInterval: any;
+
+listarPuntajes();
 //##################################################################
 document.addEventListener("DOMContentLoaded", () => {
   const $tiempoTranscurrido: Element | null = document.querySelector("#tiempoCronometro");
@@ -190,11 +193,12 @@ document.getElementsByName("cartaFrontA").forEach((cartaFront) => {
         flag = 0;
         idA = 0;
 
-        if (cartasNivel == 10) {
+        if (cartasNivel == aciertos) {
           clearInterval(idInterval);
           usuarioJson.puntajes[0] = puntuacionNivel;
           usuarioJson.tiempos[0] = tiempoNivel;
           guardarUsuario(usuarioJson);
+          guardarPuntaje(usuarioJson);
         }
       } else {
         if (flag == 2) {
@@ -316,11 +320,12 @@ document.getElementsByName("cartaFrontB").forEach((cartaFront) => {
         flag = 0;
         idB = -1;
 
-        if (cartasNivel == 10) {
+        if (cartasNivel == aciertos) {
           clearInterval(idInterval);
           usuarioJson.puntajes[0] = puntuacionNivel;
           usuarioJson.tiempos[0] = tiempoNivel;
           guardarUsuario(usuarioJson);
+          guardarPuntaje(usuarioJson);
         }
       } else {
         if (flag == 2) {
@@ -345,11 +350,69 @@ function guardarUsuario(usuario: any) {
   xhttp.send(form);
   xhttp.onreadystatechange = () => {
     if (xhttp.readyState == 4 && xhttp.status == 200) {
-      // let contenedor = document.getElementById("respuesta");
       let respuesta = JSON.parse(xhttp.responseText);
       console.log(respuesta.mensaje);
     }
   };
 }
+
+function guardarPuntaje(usuario: any) {
+  setTimeout(() => {
+    xhttp.open("POST", "./backend/GuardarPuntajes.php", true);
+    let form: FormData = new FormData();
+    form.append("usuarioJson", JSON.stringify(usuario));
+    xhttp.send(form);
+    xhttp.onreadystatechange = () => {
+      if (xhttp.readyState == 4 && xhttp.status == 200) {
+        let respuesta = JSON.parse(xhttp.responseText);
+        console.log(respuesta.mensaje);
+        listarPuntajes();
+      }
+    };  
+  }, 10);
+}
+
+function listarPuntajes() {
+  xhttp.open("GET", "./backend/ListarPuntajes.php", true);
+  xhttp.send();
+  xhttp.onreadystatechange = () => {
+    if (xhttp.readyState == 4 && xhttp.status == 200) {
+      let contenedorTabla = <HTMLDivElement> document.getElementById("contenedorTablaPuntajes");
+      let respuesta = xhttp.responseText;
+      let usuarios = JSON.parse(respuesta);
+      contenedorTabla.innerHTML = dibujarTabla(usuarios);
+    }
+  };
+}
+
+function dibujarTabla(usuarios : any) : string {
+  let tabla = "";
+  tabla += "<table><thead>";
+  tabla += "<th>N°</th>";
+  tabla += "<th>Nombre</th>";
+  tabla += "<th>Puntaje</th>";
+  tabla += "<th>Tiempo</th>";
+  tabla += "</thead>";
+  tabla += "<tbody>";
+  for (let i = 0; i < usuarios.length; i++) {
+    const usuario = usuarios[i];
+    tabla += "<tr>";
+    tabla += `<td>${i+1}</td>`;
+    for (const key in usuario) {
+      if(key == "nombre") {
+        tabla += `<td>${usuario[key]}</td>`;
+      } else if(key == "puntajes") {
+        tabla += `<td>${usuario[key][0]}</td>`;
+      } else if(key == "tiempos") {
+        tabla += `<td>${usuario[key][0]}</td>`;
+      }
+    }
+    tabla += "</tr>";
+  }
+  tabla += "</tbody></table>";
+
+  return tabla;
+}
+
 // ###################################################################################################
 // ###################################################################################################
