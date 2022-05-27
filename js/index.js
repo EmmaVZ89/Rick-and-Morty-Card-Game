@@ -1,4 +1,6 @@
 "use strict";
+/// <reference path="./Ajax.ts" />
+/// <reference path="./Cronometro.ts" />
 let idA = 0;
 let idB = -1;
 let flag = 0;
@@ -33,42 +35,12 @@ let aciertos = 10;
 let puntuacionNivel = 0;
 let plusPuntuacion = 1;
 let idInterval;
-listarPuntajes();
+const contenedorCronometro = document.querySelector("#tiempoCronometro");
+Archivo.Ajax.listarPuntajes();
+// INICIO DEL CRONOMETRO
 //##################################################################
 document.addEventListener("DOMContentLoaded", () => {
-    const $tiempoTranscurrido = document.querySelector("#tiempoCronometro");
-    let diferenciaTemporal = 0;
-    let tiempoInicio;
-    let segundos;
-    function agregarCeroSiEsNecesario(valor) {
-        if (valor < 10) {
-            return "0" + valor;
-        }
-        else {
-            return "" + valor;
-        }
-    }
-    function milisegundosAMinutosYSegundos(milisegundos) {
-        const minutos = parseInt(milisegundos / 1000 / 60);
-        milisegundos -= minutos * 60 * 1000;
-        segundos = milisegundos / 1000;
-        return `${agregarCeroSiEsNecesario(minutos)}:${agregarCeroSiEsNecesario(segundos.toFixed(2))}`;
-    }
-    function iniciar() {
-        const ahora = new Date();
-        tiempoInicio = new Date(ahora.getTime() - diferenciaTemporal);
-        clearInterval(idInterval);
-        idInterval = setInterval(refrescarTiempo, 25);
-    }
-    function refrescarTiempo() {
-        const ahora = new Date();
-        const diferencia = ahora.getTime() - tiempoInicio.getTime();
-        if ($tiempoTranscurrido) {
-            $tiempoTranscurrido.textContent = milisegundosAMinutosYSegundos(diferencia);
-            tiempoNivel = $tiempoTranscurrido.textContent;
-        }
-    }
-    iniciar();
+    idInterval = Cronometro.iniciar();
 });
 //##################################################################
 document.getElementsByName("cartaFrontA").forEach((cartaFront) => {
@@ -182,8 +154,8 @@ document.getElementsByName("cartaFrontA").forEach((cartaFront) => {
                     clearInterval(idInterval);
                     usuarioJson.puntajes[0] = puntuacionNivel;
                     usuarioJson.tiempos[0] = tiempoNivel;
-                    guardarUsuario(usuarioJson);
-                    guardarPuntaje(usuarioJson);
+                    Archivo.Ajax.guardarUsuario(usuarioJson);
+                    Archivo.Ajax.guardarPuntaje(usuarioJson);
                 }
             }
             else {
@@ -309,8 +281,8 @@ document.getElementsByName("cartaFrontB").forEach((cartaFront) => {
                     clearInterval(idInterval);
                     usuarioJson.puntajes[0] = puntuacionNivel;
                     usuarioJson.tiempos[0] = tiempoNivel;
-                    guardarUsuario(usuarioJson);
-                    guardarPuntaje(usuarioJson);
+                    Archivo.Ajax.guardarUsuario(usuarioJson);
+                    Archivo.Ajax.guardarPuntaje(usuarioJson);
                 }
             }
             else {
@@ -325,77 +297,4 @@ document.getElementsByName("cartaFrontB").forEach((cartaFront) => {
         }
     });
 });
-// FUNCIONES AJAX
-// ###################################################################################################
-// ###################################################################################################
-function guardarUsuario(usuario) {
-    xhttp.open("POST", "./backend/GuardarUsuario.php", true);
-    let form = new FormData();
-    form.append("usuarioJson", JSON.stringify(usuario));
-    xhttp.send(form);
-    xhttp.onreadystatechange = () => {
-        if (xhttp.readyState == 4 && xhttp.status == 200) {
-            let respuesta = JSON.parse(xhttp.responseText);
-            console.log(respuesta.mensaje);
-        }
-    };
-}
-function guardarPuntaje(usuario) {
-    setTimeout(() => {
-        xhttp.open("POST", "./backend/GuardarPuntajes.php", true);
-        let form = new FormData();
-        form.append("usuarioJson", JSON.stringify(usuario));
-        xhttp.send(form);
-        xhttp.onreadystatechange = () => {
-            if (xhttp.readyState == 4 && xhttp.status == 200) {
-                let respuesta = JSON.parse(xhttp.responseText);
-                console.log(respuesta.mensaje);
-                listarPuntajes();
-            }
-        };
-    }, 10);
-}
-function listarPuntajes() {
-    xhttp.open("GET", "./backend/ListarPuntajes.php", true);
-    xhttp.send();
-    xhttp.onreadystatechange = () => {
-        if (xhttp.readyState == 4 && xhttp.status == 200) {
-            let contenedorTabla = document.getElementById("contenedorTablaPuntajes");
-            let respuesta = xhttp.responseText;
-            let usuarios = JSON.parse(respuesta);
-            contenedorTabla.innerHTML = dibujarTabla(usuarios);
-        }
-    };
-}
-function dibujarTabla(usuarios) {
-    let tabla = "";
-    tabla += "<table><thead>";
-    tabla += "<th>N°</th>";
-    tabla += "<th>Nombre</th>";
-    tabla += "<th>Puntaje</th>";
-    tabla += "<th>Tiempo</th>";
-    tabla += "</thead>";
-    tabla += "<tbody>";
-    for (let i = 0; i < usuarios.length; i++) {
-        const usuario = usuarios[i];
-        tabla += "<tr>";
-        tabla += `<td>${i + 1}</td>`;
-        for (const key in usuario) {
-            if (key == "nombre") {
-                tabla += `<td>${usuario[key]}</td>`;
-            }
-            else if (key == "puntajes") {
-                tabla += `<td>${usuario[key][0]}</td>`;
-            }
-            else if (key == "tiempos") {
-                tabla += `<td>${usuario[key][0]}</td>`;
-            }
-        }
-        tabla += "</tr>";
-    }
-    tabla += "</tbody></table>";
-    return tabla;
-}
-// ###################################################################################################
-// ###################################################################################################
 //# sourceMappingURL=index.js.map
