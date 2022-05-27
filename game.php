@@ -16,6 +16,7 @@ require_once("./Usuario.php");
     <title>Prueba API</title>
     <script src="./js/Ajax.js" defer></script>
     <script src="./js/Cronometro.js" defer></script>
+    <script src="./js/Sonido.js" defer></script>
     <script src="./js/index.js" defer></script>
     <link href="./css/style.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
@@ -68,7 +69,7 @@ require_once("./Usuario.php");
             if ($i >= 0 && $i <= 9) {
                 $carta .= "<div class='tarjeta' >";
                 $carta .= "<div class='face front' data-id='{$id_personaje}' name='cartaFrontA'>";
-                $carta .= "<img src='./front.jpg' alt='img'>";
+                $carta .= "<img src='./src/img/front.jpg' alt='img'>";
                 $carta .= "</div>";
                 $carta .= "<div class='face back'name='cartaBackA" . $id_personaje . "'>";
                 $carta .= $img_personaje;
@@ -78,7 +79,7 @@ require_once("./Usuario.php");
             } else {
                 $carta .= "<div class='tarjeta' >";
                 $carta .= "<div class='face front' data-id='{$id_personaje}' name='cartaFrontB'>";
-                $carta .= "<img src='./front.jpg' alt='img'>";
+                $carta .= "<img src='./src/img/front.jpg' alt='img'>";
                 $carta .= "</div>";
                 $carta .= "<div class='face back'name='cartaBackB" . $id_personaje . "'>";
                 $carta .= $img_personaje;

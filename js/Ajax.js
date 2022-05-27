@@ -1,6 +1,7 @@
 "use strict";
 var Archivo;
 (function (Archivo) {
+    let xhttp = new XMLHttpRequest();
     class Ajax {
         static guardarUsuario(usuario) {
             xhttp.open("POST", "./backend/GuardarUsuario.php", true);

@@ -1,6 +1,8 @@
 "use strict";
 /// <reference path="./Ajax.ts" />
 /// <reference path="./Cronometro.ts" />
+/// <reference path="./Sonido.ts" />
+// VARIABLES PARA LA LOGICA DE CARTAS
 let idA = 0;
 let idB = -1;
 let flag = 0;
@@ -10,6 +12,7 @@ let aux_cartaFrontA;
 let aux_cartaBackA;
 let aux_cartaFrontB;
 let aux_cartaBackB;
+// VARIABLES PARA CALCULAR LOS INTERVALOS DE LAS CARTAS
 let tiempo1 = 2500;
 let tiempo2;
 let fecha;
@@ -17,18 +20,10 @@ let fecha2;
 let intervalo1;
 let intervalo2;
 let intervaloFinal;
-let sonidoCarta = new Audio();
-sonidoCarta.volume = 0.1;
-sonidoCarta.src = "carta2.mp3";
-let sonidoExito = new Audio();
-sonidoExito.volume = 0.03;
-sonidoExito.src = "exito.mp3";
-let sonidoFalla = new Audio();
-sonidoFalla.volume = 0.01;
-sonidoFalla.src = "error.mp3";
+// USUARIO QUE VIENE EN EL ARCHIVO HTML
 let inputJson = document.getElementById("jsonUsuario");
 let usuarioJson = JSON.parse(inputJson.value);
-let xhttp = new XMLHttpRequest();
+// VARIABLES PARA CARCULAR ACIERTOS, PUNTAJES Y GUARDAR LAS VICTORIAS
 let tiempoNivel;
 let cartasNivel = 0;
 let aciertos = 10;
@@ -36,265 +31,219 @@ let puntuacionNivel = 0;
 let plusPuntuacion = 1;
 let idInterval;
 const contenedorCronometro = document.querySelector("#tiempoCronometro");
+// MUESTRO LA TABLA DE PUNTAJES INICIAL
 Archivo.Ajax.listarPuntajes();
 // INICIO DEL CRONOMETRO
-//##################################################################
 document.addEventListener("DOMContentLoaded", () => {
     idInterval = Cronometro.iniciar();
 });
-//##################################################################
+//########################################################################################################################
+// EVENTO CARTAS TIPO A
+//########################################################################################################################
 document.getElementsByName("cartaFrontA").forEach((cartaFront) => {
     cartaFront.addEventListener("click", () => {
         if (flag < 2) {
-            sonidoCarta.pause();
-            sonidoCarta.currentTime = 0;
-            if (sonidoCarta.paused) {
-                sonidoCarta.play();
-            }
             flag++;
-            if (flag == 1) {
-                fecha = new Date();
-                intervalo1 = fecha.getTime();
-            }
-            else if (flag == 2) {
-                fecha2 = new Date();
-                intervalo2 = fecha2.getTime();
-                intervaloFinal = intervalo2 - intervalo1;
-                tiempo2 = tiempo1 - intervaloFinal;
-            }
-            let idCarta = cartaFront.getAttribute("data-id");
-            let id = parseInt(idCarta);
-            idA = id;
+            idA = parseInt(cartaFront.getAttribute("data-id"));
+            Sonido.reproducirSonidoCarta();
+            calcularIntervalos();
+            let cartaBackA = document.getElementsByName("cartaBackA" + idA)[0];
             cartaFront.style.transform = "perspective(600px) rotateY(180deg)";
-            const cartaBackA = document.getElementsByName("cartaBackA" + idCarta);
-            cartaBackA[0].style.transform = "perspective(600px) rotateY(360deg)";
+            cartaBackA.style.transform = "perspective(600px) rotateY(360deg)";
             aux_cartaFrontA = cartaFront;
             aux_cartaBackA = cartaBackA;
             if (flag == 1) {
                 idTimeA = setTimeout(() => {
                     if (idA != idB) {
                         if (aux_cartaFrontB == undefined && aux_cartaBackB == undefined) {
-                            cartaFront.style.transform = "perspective(600px) rotateY(0deg)";
-                            cartaBackA[0].style.transform = "perspective(600px) rotateY(180deg)";
+                            voltearCartasFront([cartaFront]);
+                            voltearCartasBack([cartaBackA]);
                         }
                         else {
-                            cartaFront.style.transform = "perspective(600px) rotateY(0deg)";
-                            cartaBackA[0].style.transform = "perspective(600px) rotateY(180deg)";
-                            aux_cartaFrontB.style.transform = "perspective(600px) rotateY(0deg)";
-                            aux_cartaBackB[0].style.transform = "perspective(600px) rotateY(180deg)";
-                            aux_cartaFrontB = undefined;
-                            aux_cartaBackB = undefined;
+                            voltearCartasFront([cartaFront, aux_cartaFrontB]);
+                            voltearCartasBack([cartaBackA, aux_cartaBackB]);
+                            resetearContenedoresAuxB();
                         }
                     }
-                    idA = 0;
-                    idB = -1;
-                    flag--;
-                    plusPuntuacion = 1;
-                    if (flag < 0) {
-                        flag = 0;
-                    }
+                    resetearValores();
                 }, tiempo1);
             }
             else if (flag == 2) {
                 idTimeA = setTimeout(() => {
                     if (idA != idB) {
                         if (aux_cartaFrontB == undefined && aux_cartaBackB == undefined) {
-                            cartaFront.style.transform = "perspective(600px) rotateY(0deg)";
-                            cartaBackA[0].style.transform = "perspective(600px) rotateY(180deg)";
+                            voltearCartasFront([cartaFront]);
+                            voltearCartasBack([cartaBackA]);
                         }
                         else {
-                            cartaFront.style.transform = "perspective(600px) rotateY(0deg)";
-                            cartaBackA[0].style.transform = "perspective(600px) rotateY(180deg)";
-                            aux_cartaFrontB.style.transform = "perspective(600px) rotateY(0deg)";
-                            aux_cartaBackB[0].style.transform = "perspective(600px) rotateY(180deg)";
-                            aux_cartaFrontB = undefined;
-                            aux_cartaBackB = undefined;
+                            voltearCartasFront([cartaFront, aux_cartaFrontB]);
+                            voltearCartasBack([cartaBackA, aux_cartaBackB]);
+                            resetearContenedoresAuxB();
                         }
                     }
-                    idA = 0;
-                    idB = -1;
-                    flag--;
-                    plusPuntuacion = 1;
-                    if (flag < 0) {
-                        flag = 0;
-                    }
+                    resetearValores();
                 }, tiempo2);
             }
             if (idA == idB) {
                 cartasNivel++;
-                sonidoExito.pause();
-                sonidoExito.currentTime = 0;
-                if (sonidoExito.paused) {
-                    sonidoExito.play();
-                }
-                if (plusPuntuacion == 1) {
-                    puntuacionNivel += 100;
-                    plusPuntuacion++;
-                }
-                else if (plusPuntuacion == 2) {
-                    puntuacionNivel += 100 * 1.1;
-                    plusPuntuacion++;
-                }
-                else if (plusPuntuacion == 3) {
-                    puntuacionNivel += 100 * 1.15;
-                    plusPuntuacion++;
-                }
-                else {
-                    puntuacionNivel += 100 * 1.3;
-                }
+                Sonido.reproducirSonidoExito();
+                calcularPuntuacion();
                 clearTimeout(idTimeA);
                 clearTimeout(idTimeB);
-                aux_cartaFrontA = undefined;
-                aux_cartaBackA = undefined;
-                aux_cartaFrontB = undefined;
-                aux_cartaBackB = undefined;
+                resetearContenedoresAuxA();
+                resetearContenedoresAuxB();
                 flag = 0;
                 idA = 0;
                 if (cartasNivel == aciertos) {
-                    clearInterval(idInterval);
-                    usuarioJson.puntajes[0] = puntuacionNivel;
-                    usuarioJson.tiempos[0] = tiempoNivel;
-                    Archivo.Ajax.guardarUsuario(usuarioJson);
-                    Archivo.Ajax.guardarPuntaje(usuarioJson);
+                    terminarNivel();
                 }
             }
             else {
                 if (flag == 2) {
-                    sonidoFalla.pause();
-                    sonidoFalla.currentTime = 0;
-                    if (sonidoFalla.paused) {
-                        sonidoFalla.play();
-                    }
+                    Sonido.reproducirSonidoFalla();
                 }
             }
         }
     });
 });
+//########################################################################################################################
+// EVENTO CARTAS TIPO B
+//########################################################################################################################
 document.getElementsByName("cartaFrontB").forEach((cartaFront) => {
     cartaFront.addEventListener("click", () => {
         if (flag < 2) {
-            sonidoCarta.pause();
-            sonidoCarta.currentTime = 0;
-            if (sonidoCarta.paused) {
-                sonidoCarta.play();
-            }
             flag++;
-            if (flag == 1) {
-                fecha = new Date();
-                intervalo1 = fecha.getTime();
-            }
-            else if (flag == 2) {
-                fecha2 = new Date();
-                intervalo2 = fecha2.getTime();
-                intervaloFinal = intervalo2 - intervalo1;
-                tiempo2 = tiempo1 - intervaloFinal;
-            }
-            let idCarta = cartaFront.getAttribute("data-id");
-            let id = parseInt(idCarta);
-            idB = id;
+            idB = parseInt(cartaFront.getAttribute("data-id"));
+            Sonido.reproducirSonidoCarta();
+            calcularIntervalos();
+            let cartaBackB = document.getElementsByName("cartaBackB" + idB)[0];
             cartaFront.style.transform = "perspective(600px) rotateY(180deg)";
-            const cartaBackB = document.getElementsByName("cartaBackB" + idCarta);
-            cartaBackB[0].style.transform = "perspective(600px) rotateY(360deg)";
+            cartaBackB.style.transform = "perspective(600px) rotateY(360deg)";
             aux_cartaFrontB = cartaFront;
             aux_cartaBackB = cartaBackB;
             if (flag == 1) {
                 idTimeB = setTimeout(() => {
                     if (idA != idB) {
                         if (aux_cartaFrontA == undefined && aux_cartaBackA == undefined) {
-                            cartaFront.style.transform = "perspective(600px) rotateY(0deg)";
-                            cartaBackB[0].style.transform = "perspective(600px) rotateY(180deg)";
+                            voltearCartasFront([cartaFront]);
+                            voltearCartasBack([cartaBackB]);
                         }
                         else {
-                            aux_cartaFrontA.style.transform = "perspective(600px) rotateY(0deg)";
-                            aux_cartaBackA[0].style.transform = "perspective(600px) rotateY(180deg)";
-                            cartaFront.style.transform = "perspective(600px) rotateY(0deg)";
-                            cartaBackB[0].style.transform = "perspective(600px) rotateY(180deg)";
-                            aux_cartaFrontA = undefined;
-                            aux_cartaBackA = undefined;
+                            voltearCartasFront([cartaFront, aux_cartaFrontA]);
+                            voltearCartasBack([cartaBackB, aux_cartaBackA]);
+                            resetearContenedoresAuxA();
                         }
                     }
-                    idA = 0;
-                    idB = -1;
-                    flag--;
-                    plusPuntuacion = 1;
-                    if (flag < 0) {
-                        flag = 0;
-                    }
+                    resetearValores();
                 }, tiempo1);
             }
             else if (flag == 2) {
                 idTimeB = setTimeout(() => {
                     if (idA != idB) {
                         if (aux_cartaFrontA == undefined && aux_cartaBackA == undefined) {
-                            cartaFront.style.transform = "perspective(600px) rotateY(0deg)";
-                            cartaBackB[0].style.transform = "perspective(600px) rotateY(180deg)";
+                            voltearCartasFront([cartaFront]);
+                            voltearCartasBack([cartaBackB]);
                         }
                         else {
-                            aux_cartaFrontA.style.transform = "perspective(600px) rotateY(0deg)";
-                            aux_cartaBackA[0].style.transform = "perspective(600px) rotateY(180deg)";
-                            cartaFront.style.transform = "perspective(600px) rotateY(0deg)";
-                            cartaBackB[0].style.transform = "perspective(600px) rotateY(180deg)";
-                            aux_cartaFrontA = undefined;
-                            aux_cartaBackA = undefined;
+                            voltearCartasFront([cartaFront, aux_cartaFrontA]);
+                            voltearCartasBack([cartaBackB, aux_cartaBackA]);
+                            resetearContenedoresAuxA();
                         }
                     }
-                    idA = 0;
-                    idB = -1;
-                    flag--;
-                    plusPuntuacion = 1;
-                    if (flag < 0) {
-                        flag = 0;
-                    }
+                    resetearValores();
                 }, tiempo2);
             }
             if (idA == idB) {
                 cartasNivel++;
-                sonidoExito.pause();
-                sonidoExito.currentTime = 0;
-                if (sonidoExito.paused) {
-                    sonidoExito.play();
-                }
-                if (plusPuntuacion == 1) {
-                    puntuacionNivel += 100;
-                    plusPuntuacion++;
-                }
-                else if (plusPuntuacion == 2) {
-                    puntuacionNivel += 100 * 1.1;
-                    plusPuntuacion++;
-                }
-                else if (plusPuntuacion == 3) {
-                    puntuacionNivel += 100 * 1.15;
-                    plusPuntuacion++;
-                }
-                else {
-                    puntuacionNivel += 100 * 1.3;
-                }
+                Sonido.reproducirSonidoExito();
+                calcularPuntuacion();
                 clearTimeout(idTimeA);
                 clearTimeout(idTimeB);
-                aux_cartaFrontA = undefined;
-                aux_cartaBackA = undefined;
-                aux_cartaFrontB = undefined;
-                aux_cartaBackB = undefined;
+                resetearContenedoresAuxA();
+                resetearContenedoresAuxB();
                 flag = 0;
                 idB = -1;
                 if (cartasNivel == aciertos) {
-                    clearInterval(idInterval);
-                    usuarioJson.puntajes[0] = puntuacionNivel;
-                    usuarioJson.tiempos[0] = tiempoNivel;
-                    Archivo.Ajax.guardarUsuario(usuarioJson);
-                    Archivo.Ajax.guardarPuntaje(usuarioJson);
+                    terminarNivel();
                 }
             }
             else {
                 if (flag == 2) {
-                    sonidoFalla.pause();
-                    sonidoFalla.currentTime = 0;
-                    if (sonidoFalla.paused) {
-                        sonidoFalla.play();
-                    }
+                    Sonido.reproducirSonidoFalla();
                 }
             }
         }
     });
 });
+// FUNCIONES PARA LOS EVENTOS DE LAS CARTAS A Y B
+//########################################################################################################################
+//########################################################################################################################
+//########################################################################################################################
+function calcularPuntuacion() {
+    if (plusPuntuacion == 1) {
+        puntuacionNivel += 100;
+        plusPuntuacion++;
+    }
+    else if (plusPuntuacion == 2) {
+        puntuacionNivel += 100 * 1.1;
+        plusPuntuacion++;
+    }
+    else if (plusPuntuacion == 3) {
+        puntuacionNivel += 100 * 1.15;
+        plusPuntuacion++;
+    }
+    else {
+        puntuacionNivel += 100 * 1.3;
+    }
+}
+function calcularIntervalos() {
+    if (flag == 1) {
+        fecha = new Date();
+        intervalo1 = fecha.getTime();
+    }
+    else if (flag == 2) {
+        fecha2 = new Date();
+        intervalo2 = fecha2.getTime();
+        intervaloFinal = intervalo2 - intervalo1;
+        tiempo2 = tiempo1 - intervaloFinal;
+    }
+}
+function terminarNivel() {
+    clearInterval(idInterval);
+    tiempoNivel = contenedorCronometro.textContent;
+    usuarioJson.puntajes[0] = puntuacionNivel;
+    usuarioJson.tiempos[0] = tiempoNivel;
+    Archivo.Ajax.guardarUsuario(usuarioJson);
+    Archivo.Ajax.guardarPuntaje(usuarioJson);
+}
+function voltearCartasFront([...contenedor]) {
+    for (let i = 0; i < contenedor.length; i++) {
+        contenedor[i].style.transform = "perspective(600px) rotateY(0deg)";
+    }
+}
+function voltearCartasBack([...contenedor]) {
+    for (let i = 0; i < contenedor.length; i++) {
+        contenedor[i].style.transform = "perspective(600px) rotateY(180deg)";
+    }
+}
+function resetearValores() {
+    idA = 0;
+    idB = -1;
+    flag--;
+    plusPuntuacion = 1;
+    if (flag < 0) {
+        flag = 0;
+    }
+}
+function resetearContenedoresAuxA() {
+    aux_cartaFrontA = undefined;
+    aux_cartaBackA = undefined;
+}
+function resetearContenedoresAuxB() {
+    aux_cartaFrontB = undefined;
+    aux_cartaBackB = undefined;
+}
+//########################################################################################################################
+//########################################################################################################################
+//########################################################################################################################
 //# sourceMappingURL=index.js.map

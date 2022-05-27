@@ -1,4 +1,6 @@
 namespace Archivo {
+  let xhttp: XMLHttpRequest = new XMLHttpRequest();
+
   export class Ajax {
     public static guardarUsuario(usuario: any): void {
       xhttp.open("POST", "./backend/GuardarUsuario.php", true);
