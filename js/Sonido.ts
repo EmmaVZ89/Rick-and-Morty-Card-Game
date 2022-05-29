@@ -11,6 +11,14 @@ namespace Sonido {
   sonidoFalla.volume = 0.01;
   sonidoFalla.src = "./src/sonidos/error.mp3";
 
+  let sonidoRegresiva = new Audio();
+  sonidoRegresiva.volume = 0.05;
+  sonidoRegresiva.src = "./src/sonidos/pitido1.mp3";
+
+  let sonidoRegresiva2 = new Audio();
+  sonidoRegresiva2.volume = 0.05;
+  sonidoRegresiva2.src = "./src/sonidos/pitido3.mp3";
+
   export function reproducirSonidoCarta(): void {
     sonidoCarta.pause();
     sonidoCarta.currentTime = 0;
@@ -32,6 +40,22 @@ namespace Sonido {
     sonidoFalla.currentTime = 0;
     if (sonidoFalla.paused) {
       sonidoFalla.play();
+    }
+  }
+
+  export function reproducirSonidoRegresiva(): void {
+    sonidoRegresiva.pause();
+    sonidoRegresiva.currentTime = 0;
+    if (sonidoRegresiva.paused) {
+      sonidoRegresiva.play();
+    }
+  }
+
+  export function reproducirSonidoRegresiva2(): void {
+    sonidoRegresiva2.pause();
+    sonidoRegresiva2.currentTime = 0;
+    if (sonidoRegresiva2.paused) {
+      sonidoRegresiva2.play();
     }
   }
 }

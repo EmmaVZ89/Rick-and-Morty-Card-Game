@@ -10,6 +10,12 @@ var Sonido;
     let sonidoFalla = new Audio();
     sonidoFalla.volume = 0.01;
     sonidoFalla.src = "./src/sonidos/error.mp3";
+    let sonidoRegresiva = new Audio();
+    sonidoRegresiva.volume = 0.05;
+    sonidoRegresiva.src = "./src/sonidos/pitido1.mp3";
+    let sonidoRegresiva2 = new Audio();
+    sonidoRegresiva2.volume = 0.05;
+    sonidoRegresiva2.src = "./src/sonidos/pitido3.mp3";
     function reproducirSonidoCarta() {
         sonidoCarta.pause();
         sonidoCarta.currentTime = 0;
@@ -34,5 +40,21 @@ var Sonido;
         }
     }
     Sonido.reproducirSonidoFalla = reproducirSonidoFalla;
+    function reproducirSonidoRegresiva() {
+        sonidoRegresiva.pause();
+        sonidoRegresiva.currentTime = 0;
+        if (sonidoRegresiva.paused) {
+            sonidoRegresiva.play();
+        }
+    }
+    Sonido.reproducirSonidoRegresiva = reproducirSonidoRegresiva;
+    function reproducirSonidoRegresiva2() {
+        sonidoRegresiva2.pause();
+        sonidoRegresiva2.currentTime = 0;
+        if (sonidoRegresiva2.paused) {
+            sonidoRegresiva2.play();
+        }
+    }
+    Sonido.reproducirSonidoRegresiva2 = reproducirSonidoRegresiva2;
 })(Sonido || (Sonido = {}));
 //# sourceMappingURL=Sonido.js.map

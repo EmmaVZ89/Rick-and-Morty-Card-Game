@@ -29,7 +29,7 @@ let usuarioJson = JSON.parse(inputJson.value);
 // VARIABLES PARA CARCULAR ACIERTOS, PUNTAJES Y GUARDAR LAS VICTORIAS
 let tiempoNivel: any;
 let cartasNivel: number = 0;
-let aciertos: number = 10;
+let aciertos: number = 1;
 let puntuacionNivel: number = 0;
 let plusPuntuacion: number = 1;
 let idInterval: any;
@@ -39,10 +39,12 @@ const contenedorCronometro = <HTMLDivElement>document.querySelector("#tiempoCron
 // MUESTRO LA TABLA DE PUNTAJES INICIAL
 Archivo.Ajax.listarPuntajes();
 
-// INICIO DEL CRONOMETRO
-// document.addEventListener("DOMContentLoaded", () => {
-//   idInterval = Cronometro.iniciar();
-// });
+// VARIOS PARA VENTANA MODAL
+let modalContent: any;
+let modalContainer: any;
+
+dibujarModal(armarVentandaModal());
+let btnComenzar = <HTMLButtonElement>document.getElementById("btn-comenzar");
 
 //########################################################################################################################
 // EVENTO CARTAS TIPO A
@@ -102,6 +104,9 @@ document.getElementsByName("cartaFrontA").forEach((cartaFront) => {
         idA = 0;
 
         if (cartasNivel == aciertos) {
+          dibujarModal(armarVentanaModalVictoria());
+          btnComenzar = <HTMLButtonElement>document.getElementById("btn-comenzar");
+          abrirVentanaModalVictoria(btnComenzar);           
           terminarNivel();
         }
       } else {
@@ -171,6 +176,9 @@ document.getElementsByName("cartaFrontB").forEach((cartaFront) => {
         idB = -1;
 
         if (cartasNivel == aciertos) {
+          dibujarModal(armarVentanaModalVictoria());
+          btnComenzar = <HTMLButtonElement>document.getElementById("btn-comenzar");
+          abrirVentanaModalVictoria(btnComenzar);          
           terminarNivel();
         }
       } else {
@@ -214,6 +222,11 @@ function calcularIntervalos() {
 }
 
 function terminarNivel() {
+  idA = 0;
+  idB = -1;
+  cartasNivel = 0;
+  aciertos = 1;
+  plusPuntuacion = 1;
   clearInterval(idInterval);
   tiempoNivel = contenedorCronometro.textContent;
   usuarioJson.puntajes[0] = puntuacionNivel;
@@ -254,18 +267,39 @@ function resetearContenedoresAuxB() {
   aux_cartaBackB = undefined;
 }
 
+function voltearTodasLasCartas() {
+  document.getElementsByName("cartaFrontA").forEach((cartaFront) => {
+    cartaFront.style.transform = "perspective(600px) rotateY(0deg)";
+  });
+
+  document.getElementsByName("cartaFrontB").forEach((cartaFront) => {
+    cartaFront.style.transform = "perspective(600px) rotateY(0deg)";
+  });
+
+  let cartasBack  = document.getElementsByClassName("back");
+  for (let i = 0; i < cartasBack.length; i++) {
+    const carta = cartasBack[i];
+    carta.style.transform = "perspective(600px) rotateY(180deg)";
+  }
+}
+
+function limpiarContenedorCartas() {
+  let contenedor = <HTMLDivElement>document.getElementById("contenedor-carta");
+  let filas = document.querySelectorAll(".row");
+  let arrayFilas = [...filas];
+  arrayFilas.sort(()=>Math.random() - 0.5);
+  for (let i = 0; i < arrayFilas.length; i++) {
+    const element = arrayFilas[i];
+    contenedor.appendChild(element);
+  }
+}
 // FUNCIONES PARA CREAR UNA VENTANA MODAL
 //*****************************************************************************************
 //*****************************************************************************************
 //*****************************************************************************************
-let modalContent: any;
-let modalContainer: any;
-
-dibujarModal(armarVentandaModal());
-
-let btnComenzar = <HTMLButtonElement>document.getElementById("btn-comenzar");
 
 btnComenzar.addEventListener("click", (e: any) => {
+  Sonido.reproducirSonidoRegresiva();
   let numero = 3;
   let idInt: any;
   btnComenzar.innerText = numero.toString();
@@ -273,14 +307,43 @@ btnComenzar.addEventListener("click", (e: any) => {
     numero--;
     btnComenzar.innerText = numero.toString();
     if (numero === 0) {
+      Sonido.reproducirSonidoRegresiva2();
       clearInterval(idInt);
       idInterval = Cronometro.iniciar();
       if (e.target === btnComenzar) {
         removerModal(modalContainer);
       }
+    } else {
+      Sonido.reproducirSonidoRegresiva();
     }
   }, 1000);
 });
+
+function abrirVentanaModalVictoria(btnComenzar : any) {
+  btnComenzar.addEventListener("click", (e: any) => {
+    Sonido.reproducirSonidoRegresiva();
+    voltearTodasLasCartas();
+    puntuacionNivel = 0
+    let numero = 3;
+    let idInt: any;
+    btnComenzar.innerText = numero.toString();
+    idInt = setInterval(() => {
+      numero--;
+      btnComenzar.innerText = numero.toString();
+      if (numero === 0) {
+        limpiarContenedorCartas();
+        Sonido.reproducirSonidoRegresiva2();
+        clearInterval(idInt);
+        idInterval = Cronometro.iniciar();
+        if (e.target === btnComenzar) {
+          removerModal(modalContainer);
+        }
+      } else {
+        Sonido.reproducirSonidoRegresiva();
+      }
+    }, 1000);
+  });  
+}
 
 function dibujarModal(content: any) {
   modalContent = createCustomElement(
@@ -309,8 +372,15 @@ function removerModal(contenedor: any) {
 
 function armarVentandaModal(): string {
   let ventana = "";
-  ventana += `<h2 class="usuario-bienvenida">! Bienvenido/a ${usuarioJson.nombre} !</h2>`;
+  ventana += `<h2 class="usuario-bienvenida">!Bienvenido/a ${usuarioJson.nombre}!</h2>`;
   ventana += `<button id="btn-comenzar">Comenzar</button>`;
+  return ventana;
+}
+
+function armarVentanaModalVictoria() : string {
+  let ventana = "";
+  ventana += `<h2 class="usuario-victoria">Puntuación: ${puntuacionNivel}</h2>`;
+  ventana += `<button id="btn-comenzar">Reiniciar Nivel</button>`;
   return ventana;
 }
 
