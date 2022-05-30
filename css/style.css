@@ -82,17 +82,31 @@ body {
   background-position: center;
 }
 
+.contenedor-general {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
 .cronometro {
   text-align: right;
   color: #06e42b;
   font-weight: bold;
-  text-shadow: 1px 1px 2px black;
-  margin-right: 2rem;
+  text-shadow: 0 0 1rem rgb(255, 255, 255);
+  margin-right: 5rem;
+  position: fixed;
+  bottom: 30%;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 0.1rem;
+  border-radius: 1rem;
 }
 
 .contenedor-cartas {
   width: 60%;
   margin: auto;
+  padding: 0.5rem 0 0.5rem 0;
   background-image: url("../src/img/fondoGame3.jpg");
   background-attachment: fixed;
   background-repeat: no-repeat;
@@ -178,12 +192,66 @@ body {
   cursor: pointer;
 }
 
-.tabla-puntajes {
+/* FOOTER */
+footer {
+  margin-bottom: 0.5rem;
+}
+
+.footer-link {
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.footer-link > p {
+  width: 20rem;
+  margin: auto;
+  padding: 2px;
   color: white;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 1rem;
+}
+
+.footer-link >p>a {
+  /* text-decoration: none; */
+  color:white;
+  font-weight: bold;
+}
+
+.footer-link >p :hover{
+  color: orange;
+  transition: color 0.5s;
+}
+
+@media screen and (max-width: 765px) {
+  .contenedor-cartas {
+    width: 90%;
+  }  
+  .cronometro {
+    top: 4px;
+    right: 4px;
+    z-index: 100;
+    background-color: rgba(0, 0, 0, 0.8);
+    width: fit-content;
+    height: fit-content;
+    margin: 0;
+    padding: 0.1rem;
+    border-radius: 1rem;
+  }
 }
 
 @media screen and (max-width: 420px) {
   .contenedor-cartas {
     width: 100%;
+  }
+
+  .tarjeta {
+    position: relative;
+    /* width: 5rem; */
+    height: 8rem;
+    margin: 1rem 0.1rem;
+  }
+  
+  .tarjeta .back p {
+    font-size: 0.8rem;
   }
 }

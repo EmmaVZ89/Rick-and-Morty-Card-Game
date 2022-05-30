@@ -25,19 +25,19 @@ require_once("./Usuario.php");
         <div class="contenedor-form">
             <form class="form" action="" method="get">
                 <div class="form-floating mb-3 input-form input-nombre">
-                    <input class="form-control" type="text" id="txtNombre" name="nombre" placeholder="Nombre" required />
+                    <input class="form-control" type="text" id="txtNombre" name="nombre" placeholder="Nombre" maxlength="10" required />
                     <label for="txtNombre">Ingrese su nombre </label>
                 </div>
                 <input class="btn btn-success btn-submit" type="submit" value="Aceptar">
             </form>
         </div>
     </div>
+    <footer>
+        <div class="footer-link">
+            <p>Creado por <a href="https://github.com/EmmaVZ89" target="_blank">Emmanuel Zelarayan</a> ©2022</p>
+        </div>
+    </footer>
 </body>
-<footer>
-    <div class="footer-link">
-        <p>Creado por <a href="https://github.com/EmmaVZ89" target="_blank">Emmanuel Zelarayan</a> ©2022</p>
-    </div>
-</footer>
 </html>
 
 <?php
@@ -49,7 +49,7 @@ if (isset($_COOKIE["cookie_usuario"])) {
     header("Location: game.php");
 } else if (isset($_GET["nombre"])) {
     $nombre = isset($_GET["nombre"]) ? $_GET["nombre"] : null;
-    if ($nombre) {
+    if (strlen($nombre) <= 10) {
         $id = date("dmhis");
         $usuario = new Usuario($id, $nombre);
         setcookie("cookie_usuario", $usuario->ToJSON(), time() + 5184000, "/");

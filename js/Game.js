@@ -26,19 +26,20 @@ let usuarioJson = JSON.parse(inputJson.value);
 // VARIABLES PARA CARCULAR ACIERTOS, PUNTAJES Y GUARDAR LAS VICTORIAS
 let tiempoNivel;
 let cartasNivel = 0;
-let aciertos = 1;
+let aciertos = 10;
 let puntuacionNivel = 0;
 let plusPuntuacion = 1;
 let idInterval;
 const contenedorCronometro = document.querySelector("#tiempoCronometro");
 // contenedorCronometro.textContent = "00:00.00";
 // MUESTRO LA TABLA DE PUNTAJES INICIAL
-Archivo.Ajax.listarPuntajes();
+// Archivo.Ajax.listarPuntajes();
 // VARIOS PARA VENTANA MODAL
 let modalContent;
 let modalContainer;
 dibujarModal(armarVentandaModal());
 let btnComenzar = document.getElementById("btn-comenzar");
+let btnPuntajes = document.getElementById("btn-puntajes");
 //########################################################################################################################
 // EVENTO CARTAS TIPO A
 //########################################################################################################################
@@ -220,7 +221,7 @@ function terminarNivel() {
     idA = 0;
     idB = -1;
     cartasNivel = 0;
-    aciertos = 1;
+    aciertos = 10;
     plusPuntuacion = 1;
     clearInterval(idInterval);
     tiempoNivel = contenedorCronometro.textContent;
@@ -269,17 +270,26 @@ function voltearTodasLasCartas() {
         carta.style.transform = "perspective(600px) rotateY(180deg)";
     }
 }
-function limpiarContenedorCartas() {
+function mezclarContenedorCartas() {
     let contenedor = document.getElementById("contenedor-carta");
     let filas = document.querySelectorAll(".row");
+    let columnas = document.querySelectorAll(".tarjeta");
     let arrayFilas = [...filas];
+    let arrayColumnas = [...columnas];
     arrayFilas.sort(() => Math.random() - 0.5);
+    arrayColumnas.sort(() => Math.random() - 0.5);
+    let indiceCarta = 0;
     for (let i = 0; i < arrayFilas.length; i++) {
-        const element = arrayFilas[i];
-        contenedor.appendChild(element);
+        const fila = arrayFilas[i];
+        for (let j = 0; j < 5; j++) {
+            const columna = arrayColumnas[indiceCarta];
+            fila.appendChild(columna);
+            indiceCarta++;
+        }
+        contenedor.appendChild(fila);
     }
 }
-// FUNCIONES PARA CREAR UNA VENTANA MODAL
+// FUNCIONES PARA CREAR, ABRIR Y CERRAR VENTANAS MODALES
 //*****************************************************************************************
 //*****************************************************************************************
 //*****************************************************************************************
@@ -304,6 +314,22 @@ btnComenzar.addEventListener("click", (e) => {
         }
     }, 1000);
 });
+btnPuntajes.addEventListener("click", (e) => {
+    dibujarModalPuntajes(armarVentanaModalPuntajes());
+    Archivo.Ajax.listarPuntajes();
+    agregarClaseIdTabla();
+});
+function agregarClaseIdTabla() {
+    setTimeout(() => {
+        const usuariosTr = document.querySelectorAll(".tabla-tr");
+        usuariosTr.forEach((usuario) => {
+            let id = parseInt(usuario.getAttribute("data-id"));
+            if (id == usuarioJson.id) {
+                usuario.classList.add("usuario-id");
+            }
+        });
+    }, 10);
+}
 function abrirVentanaModalVictoria(btnComenzar) {
     btnComenzar.addEventListener("click", (e) => {
         Sonido.reproducirSonidoRegresiva();
@@ -316,7 +342,7 @@ function abrirVentanaModalVictoria(btnComenzar) {
             numero--;
             btnComenzar.innerText = numero.toString();
             if (numero === 0) {
-                limpiarContenedorCartas();
+                mezclarContenedorCartas();
                 Sonido.reproducirSonidoRegresiva2();
                 clearInterval(idInt);
                 idInterval = Cronometro.iniciar();
@@ -339,22 +365,45 @@ function dibujarModal(content) {
         id: "contenedor-modal",
         class: "contenedor-modal",
     }, [modalContent]);
-    // imprimimos el modal
     document.body.appendChild(modalContainer);
+}
+function dibujarModalPuntajes(content) {
+    modalContent = createCustomElement("div", {
+        id: "contenido-modal-puntajes",
+        class: "contenido-modal-puntajes",
+    }, [content]);
+    modalContainer = createCustomElement("div", {
+        id: "contenedor-modal-puntajes",
+        class: "contenedor-modal-puntajes",
+    }, [modalContent]);
+    document.body.appendChild(modalContainer);
+    modalContainer.addEventListener("click", (e) => {
+        if (e.target === modalContainer) {
+            removerModal(modalContainer);
+        }
+    });
 }
 function removerModal(contenedor) {
     document.body.removeChild(contenedor);
 }
 function armarVentandaModal() {
     let ventana = "";
-    ventana += `<h2 class="usuario-bienvenida">!Bienvenido/a ${usuarioJson.nombre}!</h2>`;
+    ventana += `<h2 class="usuario-bienvenida">!Hola ${usuarioJson.nombre}!</h2>`;
     ventana += `<button id="btn-comenzar">Comenzar</button>`;
     return ventana;
 }
 function armarVentanaModalVictoria() {
     let ventana = "";
-    ventana += `<h2 class="usuario-victoria">Puntuación: ${puntuacionNivel}</h2>`;
+    ventana += `<h2 class="usuario-victoria">¡Felicitaciones!</h2>`;
+    ventana += `<h4 class="usuario-victoria">Tu puntuación es:</h4>`;
+    ventana += `<h4 class="usuario-victoria">¡${puntuacionNivel} puntos!</h4>`;
     ventana += `<button id="btn-comenzar">Reiniciar Nivel</button>`;
+    return ventana;
+}
+function armarVentanaModalPuntajes() {
+    let ventana = "";
+    ventana += `<h2 class="usuarios-puntajes">Ranking</h2>`;
+    ventana += `<div id="contenedorTablaPuntajes" class="tabla-puntajes"></div>`;
     return ventana;
 }
 function createCustomElement(element, attibutes, children) {

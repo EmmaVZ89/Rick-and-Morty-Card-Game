@@ -25,7 +25,6 @@ var Archivo;
                     if (xhttp.readyState == 4 && xhttp.status == 200) {
                         let respuesta = JSON.parse(xhttp.responseText);
                         console.log(respuesta.mensaje);
-                        Ajax.listarPuntajes();
                     }
                 };
             }, 10);
@@ -44,26 +43,26 @@ var Archivo;
         }
         static dibujarTabla(usuarios) {
             let tabla = "";
-            tabla += "<table><thead>";
-            tabla += "<th>N°</th>";
-            tabla += "<th>Nombre</th>";
-            tabla += "<th>Puntaje</th>";
-            tabla += "<th>Tiempo</th>";
+            tabla += "<table class='tabla-puntajes'><thead id='tabla-thead'>";
+            tabla += "<tr><th class='tabla-th'>Posición</th>";
+            tabla += "<th class='tabla-th'>Nombre</th>";
+            tabla += "<th class='tabla-th'>Puntaje</th>";
+            tabla += "<th class='tabla-th'>Tiempo</th></tr>";
             tabla += "</thead>";
-            tabla += "<tbody>";
-            for (let i = 0; i < usuarios.length; i++) {
+            tabla += "<tbody class='tabla-tbody'>";
+            for (let i = 0; i < 10; i++) {
                 const usuario = usuarios[i];
-                tabla += "<tr>";
-                tabla += `<td>${i + 1}</td>`;
+                tabla += `<tr class='tabla-tr' data-id='${usuario.id}'>`;
+                tabla += `<td class='tabla-td'>${i + 1}</td>`;
                 for (const key in usuario) {
                     if (key == "nombre") {
-                        tabla += `<td>${usuario[key]}</td>`;
+                        tabla += `<td class='tabla-td'>${usuario[key]}</td>`;
                     }
                     else if (key == "puntajes") {
-                        tabla += `<td>${usuario[key][0]}</td>`;
+                        tabla += `<td class='tabla-td'>${usuario[key][0]}</td>`;
                     }
                     else if (key == "tiempos") {
-                        tabla += `<td>${usuario[key][0]}</td>`;
+                        tabla += `<td class='tabla-td'>${usuario[key][0]}</td>`;
                     }
                 }
                 tabla += "</tr>";
