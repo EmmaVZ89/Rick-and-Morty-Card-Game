@@ -1,24 +1,21 @@
 <?php
-
-use Zelarayan\Usuario;
-
 require_once("../Usuario.php");
 
-$usuarios = Usuario::TraerUsuariosJSON("./archivos/puntajes.json");
+$usuarios = Usuario::TraerPuntajesUsuarios();
 if ($usuarios) {
     // ordeno el array segun sus puntajes
     usort($usuarios, function ($a, $b) {
-        $minA = intval(explode(":", $a->tiempos[0])[0]);
-        $minB = intval(explode(":", $b->tiempos[0])[0]);
-        $segA = intval(explode(".", explode(":", $a->tiempos[0])[1])[0]);
-        $segB = intval(explode(".", explode(":", $b->tiempos[0])[1])[0]);
-        $milA = intval(explode(".", explode(":", $a->tiempos[0])[1])[1]);
-        $milB = intval(explode(".", explode(":", $b->tiempos[0])[1])[1]);
+        $minA = intval(explode(":", $a->tiempo)[0]);
+        $minB = intval(explode(":", $b->tiempo)[0]);
+        $segA = intval(explode(".", explode(":", $a->tiempo)[1])[0]);
+        $segB = intval(explode(".", explode(":", $b->tiempo)[1])[0]);
+        $milA = intval(explode(".", explode(":", $a->tiempo)[1])[1]);
+        $milB = intval(explode(".", explode(":", $b->tiempo)[1])[1]);
 
         $retorno = 0;
         if (
-            $a->puntajes[0] < $b->puntajes[0] ||
-            ($a->puntajes[0] == $b->puntajes[0] && compararTiempos($minA, $minB, $segA, $segB, $milA, $milB))
+            $a->puntaje < $b->puntaje ||
+            ($a->puntaje == $b->puntaje && compararTiempos($minA, $minB, $segA, $segB, $milA, $milB))
         ) {
             $retorno = 1;
         } else {

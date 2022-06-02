@@ -1,7 +1,4 @@
 <?php
-
-namespace Zelarayan;
-
 require_once("./Usuario.php");
 
 ?>
@@ -13,7 +10,7 @@ require_once("./Usuario.php");
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prueba API</title>
+    <title>Rick and Morty Card Game</title>
     <script src="./js/Ajax.js" defer></script>
     <script src="./js/Cronometro.js" defer></script>
     <script src="./js/Sonido.js" defer></script>
@@ -28,10 +25,11 @@ require_once("./Usuario.php");
 session_start();
 if (isset($_SESSION["usuario"])) {
     $obj = json_decode($_SESSION["usuario"]);
-    $usuario = Usuario::TraerUsuarioJSON($obj->id, "./backend/archivos/usuarios.json");
-    $_SESSION["usuario"] = isset($usuario) ? $usuario->ToJSON() : null;
+    $usuario = Usuario::TraerUsuario($obj->id);
+    $_SESSION["usuario"] = $usuario->ToJSON();
 } else {
-    header("Location: index.php");
+    session_destroy();
+    header("Location: ./index.php");
 }
 ?>
 

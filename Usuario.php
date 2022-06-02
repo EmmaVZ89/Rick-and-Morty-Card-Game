@@ -1,29 +1,26 @@
 <?php
-
-namespace Zelarayan;
-
-use stdClass;
+require_once "accesoDatos.php";
 
 class Usuario
 {
-    public string $id;
+    public int $id;
     public string $nombre;
     public int $nivel;
-    public array $puntajes;
-    public array $tiempos;
+    public int $puntaje;
+    public string $tiempo;
 
     public function __construct(
-        string $id = "",
+        int $id = 0,
         string $nombre = "",
         int $nivel = 0,
-        array $puntajes = array(0, 0, 0),
-        array $tiempos = array("", "", "")
+        int $puntaje = 0,
+        string $tiempo = ""
     ) {
         $this->id = $id;
         $this->nombre = $nombre;
         $this->nivel = $nivel;
-        $this->puntajes = $puntajes;
-        $this->tiempos = $tiempos;
+        $this->puntaje = $puntaje;
+        $this->tiempo = $tiempo;
     }
 
     public function ToJSON(): string
@@ -31,155 +28,238 @@ class Usuario
         return json_encode($this);
     }
 
-    public function GuardarUsuario(string $ruta): string
+    //##########################################################################
+    // CRUD USUARIOS
+    public function GuardarUsuario(): string
     {
         $exito = false;
         $mensaje = "No se pudo guardar el Usuario";
-        //ABRO EL ARCHIVO
-        $ar = fopen($ruta, "a"); //A - append
-        //ESCRIBO EN EL ARCHIVO CON FORMATO: $this->ToJSON()
-        $cant = fwrite($ar, "{$this->ToJSON()},\r\n");
-        if ($cant > 0) {
-            $exito = true;
+
+        $accesoDatos = AccesoDatos::obtenerObjetoAccesoDatos();
+        $consulta = $accesoDatos->retornarConsulta("INSERT INTO jugadores (id, nombre, nivel, puntaje, tiempo) "
+            . "VALUES(:id, :nombre, :nivel, :puntaje, :tiempo)");
+
+        $consulta->bindValue(":id", $this->id, PDO::PARAM_INT);
+        $consulta->bindValue(":nombre", $this->nombre, PDO::PARAM_STR);
+        $consulta->bindValue(":nivel", $this->nivel, PDO::PARAM_INT);
+        $consulta->bindValue(":puntaje", $this->puntaje, PDO::PARAM_INT);
+        $consulta->bindValue(":tiempo", $this->tiempo, PDO::PARAM_STR);
+        $exito = $consulta->execute();
+
+        if ($exito) {
             $mensaje = "Usuario Guardado con exito";
         }
-        //CIERRO EL ARCHIVO
-        fclose($ar);
 
-        //Creo array asociativo para luego parsearlo a JSON
-        $retorno = array("exito" => $exito, "mensaje" => $mensaje);
+        $retorno = json_encode(array("exito" => $exito, "mensaje" => $mensaje));
 
-        return json_encode($retorno);
+        return $retorno;
     }
 
-    public static function TraerUsuariosJSON($ruta): array
+    public static function TraerUsuarios(): array
     {
+        $accesoDatos = AccesoDatos::obtenerObjetoAccesoDatos();
+        $consulta = $accesoDatos->retornarConsulta(
+            "SELECT * FROM jugadores"
+        );
+        $consulta->execute();
+
         $array_usuarios = array();
-
-        //ABRO EL ARCHIVO
-        // "./archivos/usuarios.json"
-        $ar = fopen($ruta, "r");
-        $contenido = "";
-        //LEO LINEA X LINEA DEL ARCHIVO 
-        while (!feof($ar)) {
-            $contenido .= fgets($ar);
-        }
-        //CIERRO EL ARCHIVO
-        fclose($ar);
-
-        $array_contenido = explode(",\r\n", $contenido);
-
-        for ($i = 0; $i < count($array_contenido); $i++) {
-            if ($array_contenido[$i] != "") {
-                $obj = json_decode($array_contenido[$i]);
-                $usuario = new Usuario($obj->id, $obj->nombre, $obj->nivel, $obj->puntajes, $obj->tiempos);
-                array_push($array_usuarios, $usuario);
-            }
+        while ($fila = $consulta->fetch(PDO::FETCH_ASSOC)) {
+            $id = $fila["id"];
+            $nombre = $fila["nombre"];
+            $nivel = $fila["nivel"];
+            $puntaje = $fila["puntaje"];
+            $tiempo = $fila["tiempo"];
+            $usuario = new Usuario($id, $nombre, $nivel, $puntaje, $tiempo);
+            array_push($array_usuarios, $usuario);
         }
 
         return $array_usuarios;
     }
 
-    public static function TraerUsuarioJSON($id, $ruta)
+    public static function TraerUsuario($id)
     {
-        $usuario_retorno = null;
-        //ABRO EL ARCHIVO
-        $ar = fopen($ruta, "r");
-        $contenido = "";
-        //LEO LINEA X LINEA DEL ARCHIVO 
-        while (!feof($ar)) {
-            $contenido .= fgets($ar);
-        }
-        //CIERRO EL ARCHIVO
-        fclose($ar);
+        $usuario = null;
+        $accesoDatos = AccesoDatos::obtenerObjetoAccesoDatos();
+        $consulta = $accesoDatos->retornarConsulta(
+            "SELECT * FROM jugadores WHERE id = :id"
+        );
+        $consulta->bindValue(":id", $id, PDO::PARAM_INT);
+        $consulta->execute();
 
-        $array_contenido = explode(",\r\n", $contenido);
-
-        for ($i = 0; $i < count($array_contenido); $i++) {
-            if ($array_contenido[$i] != "") {
-                $obj = json_decode($array_contenido[$i]);
-                $usuario = new Usuario($obj->id, $obj->nombre, $obj->nivel, $obj->puntajes, $obj->tiempos);
-                if ($usuario->id == $id) {
-                    $usuario_retorno = $usuario;
-                    break;
-                }
-            }
+        while ($fila = $consulta->fetch(PDO::FETCH_ASSOC)) {
+            $id = $fila["id"];
+            $nombre = $fila["nombre"];
+            $nivel = $fila["nivel"];
+            $puntaje = $fila["puntaje"];
+            $tiempo = $fila["tiempo"];
+            $usuario = new Usuario($id, $nombre, $nivel, $puntaje, $tiempo);
         }
 
-        return $usuario_retorno;
+        return $usuario;
     }
 
-    public static function ValidarUsuario(string $id, $ruta): bool
+    public static function ModificarUsuario(Usuario $usuarioMod): string
+    {
+        $exito = false;
+        $mensaje = "No se pudo modificar el usuario";
+        $accesoDatos = AccesoDatos::obtenerObjetoAccesoDatos();
+
+        $cadena =
+            "UPDATE jugadores SET nombre = :nombre, nivel = :nivel, puntaje = :puntaje, 
+        tiempo = :tiempo WHERE id = :id";
+        $consulta = $accesoDatos->retornarConsulta($cadena);
+
+        $consulta->bindValue(":id", $usuarioMod->id, PDO::PARAM_INT);
+        $consulta->bindValue(":nombre", $usuarioMod->nombre, PDO::PARAM_STR);
+        $consulta->bindValue(":nivel", $usuarioMod->nivel, PDO::PARAM_INT);
+        $consulta->bindValue(":puntaje", $usuarioMod->puntaje, PDO::PARAM_INT);
+        $consulta->bindValue(":tiempo", $usuarioMod->tiempo, PDO::PARAM_STR);
+        $consulta->execute();
+
+        $total_modificado = $consulta->rowCount();
+        if ($total_modificado == 1) {
+            $exito = true;
+            $mensaje = "Usuario Modificado!";
+        }
+
+        $retorno = json_encode(array("exito" => $exito, "mensaje" => $mensaje));
+
+        return $retorno;
+    }
+
+    public static function EliminarUsuario($id)
     {
         $retorno = false;
-        //ABRO EL ARCHIVO
-        $ar = fopen($ruta, "r");
-        $contenido = "";
-        //LEO LINEA X LINEA DEL ARCHIVO 
-        while (!feof($ar)) {
-            $contenido .= fgets($ar);
-        }
-        //CIERRO EL ARCHIVO
-        fclose($ar);
+        $accesoDatos = AccesoDatos::obtenerObjetoAccesoDatos();
+        $consulta = $accesoDatos->retornarConsulta("DELETE FROM jugadores WHERE id = :id");
+        $consulta->bindValue(":id", $id, PDO::PARAM_INT);
+        $consulta->execute();
 
-        $array_contenido = explode(",\r\n", $contenido);
-
-        for ($i = 0; $i < count($array_contenido); $i++) {
-            if ($array_contenido[$i] != "") {
-                $obj = json_decode($array_contenido[$i]);
-                $usuario = new Usuario($obj->id, $obj->nombre, $obj->nivel, $obj->puntajes, $obj->tiempos);
-                if ($usuario->id == $id) {
-                    $retorno = true;
-                    break;
-                }
-            }
+        $total_borrado = $consulta->rowCount();
+        if ($total_borrado == 1) {
+            $retorno = true;
         }
 
         return $retorno;
     }
 
-    public static function ModificarUsuario(Usuario $usuarioMod, $ruta): string
+    //##########################################################################
+    //##########################################################################
+    // CRUD PUNTAJES
+    public function GuardarPuntajeUsuario(): string
+    {
+        $exito = false;
+        $mensaje = "No se pudo guardar el Usuario";
+
+        $accesoDatos = AccesoDatos::obtenerObjetoAccesoDatos();
+        $consulta = $accesoDatos->retornarConsulta("INSERT INTO puntajes (id, nombre, nivel, puntaje, tiempo) "
+            . "VALUES(:id, :nombre, :nivel, :puntaje, :tiempo)");
+
+        $consulta->bindValue(":id", $this->id, PDO::PARAM_INT);
+        $consulta->bindValue(":nombre", $this->nombre, PDO::PARAM_STR);
+        $consulta->bindValue(":nivel", $this->nivel, PDO::PARAM_INT);
+        $consulta->bindValue(":puntaje", $this->puntaje, PDO::PARAM_INT);
+        $consulta->bindValue(":tiempo", $this->tiempo, PDO::PARAM_STR);
+        $exito = $consulta->execute();
+
+        if ($exito) {
+            $mensaje = "Usuario Guardado con exito";
+        }
+
+        $retorno = json_encode(array("exito" => $exito, "mensaje" => $mensaje));
+
+        return $retorno;
+    }
+
+    public static function TraerPuntajesUsuarios(): array
+    {
+        $accesoDatos = AccesoDatos::obtenerObjetoAccesoDatos();
+        $consulta = $accesoDatos->retornarConsulta(
+            "SELECT * FROM puntajes"
+        );
+        $consulta->execute();
+
+        $array_usuarios = array();
+        while ($fila = $consulta->fetch(PDO::FETCH_ASSOC)) {
+            $id = $fila["id"];
+            $nombre = $fila["nombre"];
+            $nivel = $fila["nivel"];
+            $puntaje = $fila["puntaje"];
+            $tiempo = $fila["tiempo"];
+            $usuario = new Usuario($id, $nombre, $nivel, $puntaje, $tiempo);
+            array_push($array_usuarios, $usuario);
+        }
+
+        return $array_usuarios;
+    }
+
+    public static function TraerPuntajeUsuario($id)
+    {
+        $usuario = null;
+        $accesoDatos = AccesoDatos::obtenerObjetoAccesoDatos();
+        $consulta = $accesoDatos->retornarConsulta(
+            "SELECT * FROM puntajes WHERE id = :id"
+        );
+        $consulta->bindValue(":id", $id, PDO::PARAM_INT);
+        $consulta->execute();
+
+        while ($fila = $consulta->fetch(PDO::FETCH_ASSOC)) {
+            $id = $fila["id"];
+            $nombre = $fila["nombre"];
+            $nivel = $fila["nivel"];
+            $puntaje = $fila["puntaje"];
+            $tiempo = $fila["tiempo"];
+            $usuario = new Usuario($id, $nombre, $nivel, $puntaje, $tiempo);
+        }
+
+        return $usuario;
+    }
+
+    public static function ModificarPuntajeUsuario(Usuario $usuarioMod): string
     {
         $exito = false;
         $mensaje = "No se pudo modificar el usuario";
-        $array_usuarios = array();
-        //ABRO EL ARCHIVO
-        $ar = fopen($ruta, "r");
-        $contenido = "";
-        //LEO LINEA X LINEA DEL ARCHIVO 
-        while (!feof($ar)) {
-            $contenido .= fgets($ar);
-        }
-        //CIERRO EL ARCHIVO
-        fclose($ar);
+        $accesoDatos = AccesoDatos::obtenerObjetoAccesoDatos();
 
-        $array_contenido = explode(",\r\n", $contenido);
+        $cadena =
+            "UPDATE puntajes SET nombre = :nombre, nivel = :nivel, puntaje = :puntaje, 
+        tiempo = :tiempo WHERE id = :id";
+        $consulta = $accesoDatos->retornarConsulta($cadena);
 
-        for ($i = 0; $i < count($array_contenido); $i++) {
-            if ($array_contenido[$i] != "") {
-                $obj = json_decode($array_contenido[$i]);
-                $usuario = new Usuario($obj->id, $obj->nombre, $obj->nivel, $obj->puntajes, $obj->tiempos);
-                if ($usuario->id == $usuarioMod->id) {
-                    array_push($array_usuarios, $usuarioMod->ToJSON() . ",\r\n");
-                    $exito = true;
-                    $mensaje = "Usuario modificado";
-                } else {
-                    array_push($array_usuarios, $usuario->ToJSON() . ",\r\n");
-                }
-            }
+        $consulta->bindValue(":id", $usuarioMod->id, PDO::PARAM_INT);
+        $consulta->bindValue(":nombre", $usuarioMod->nombre, PDO::PARAM_STR);
+        $consulta->bindValue(":nivel", $usuarioMod->nivel, PDO::PARAM_INT);
+        $consulta->bindValue(":puntaje", $usuarioMod->puntaje, PDO::PARAM_INT);
+        $consulta->bindValue(":tiempo", $usuarioMod->tiempo, PDO::PARAM_STR);
+        $consulta->execute();
+
+        $total_modificado = $consulta->rowCount();
+        if ($total_modificado == 1) {
+            $exito = true;
+            $mensaje = "Usuario Modificado!";
         }
 
-        $ar = fopen($ruta, "w");
-        //ESCRIBO EN EL ARCHIVO
-        foreach ($array_usuarios as $item) {
-            fwrite($ar, $item);
-        }
-        //CIERRO EL ARCHIVO
-        fclose($ar);
+        $retorno = json_encode(array("exito" => $exito, "mensaje" => $mensaje));
 
-        return json_encode(array("exito" => $exito, "mensaje" => $mensaje));
+        return $retorno;
     }
 
+    public static function EliminarPuntajeUsuario($id)
+    {
+        $retorno = false;
+        $accesoDatos = AccesoDatos::obtenerObjetoAccesoDatos();
+        $consulta = $accesoDatos->retornarConsulta("DELETE FROM puntajes WHERE id = :id");
+        $consulta->bindValue(":id", $id, PDO::PARAM_INT);
+        $consulta->execute();
+
+        $total_borrado = $consulta->rowCount();
+        if ($total_borrado == 1) {
+            $retorno = true;
+        }
+
+        return $retorno;
+    }
 
     //##########################################################################
 }

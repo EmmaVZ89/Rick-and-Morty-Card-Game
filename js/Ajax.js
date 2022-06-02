@@ -27,7 +27,7 @@ var Archivo;
                         console.log(respuesta.mensaje);
                     }
                 };
-            }, 10);
+            }, 100);
         }
         static listarPuntajes() {
             xhttp.open("GET", "./backend/ListarPuntajes.php", true);
@@ -50,7 +50,7 @@ var Archivo;
             tabla += "<th class='tabla-th'>Tiempo</th></tr>";
             tabla += "</thead>";
             tabla += "<tbody class='tabla-tbody'>";
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < usuarios.length; i++) {
                 const usuario = usuarios[i];
                 tabla += `<tr class='tabla-tr' data-id='${usuario.id}'>`;
                 tabla += `<td class='tabla-td'>${i + 1}</td>`;
@@ -58,14 +58,17 @@ var Archivo;
                     if (key == "nombre") {
                         tabla += `<td class='tabla-td'>${usuario[key]}</td>`;
                     }
-                    else if (key == "puntajes") {
-                        tabla += `<td class='tabla-td'>${usuario[key][0]}</td>`;
+                    else if (key == "puntaje") {
+                        tabla += `<td class='tabla-td'>${usuario[key]}</td>`;
                     }
-                    else if (key == "tiempos") {
-                        tabla += `<td class='tabla-td'>${usuario[key][0]}</td>`;
+                    else if (key == "tiempo") {
+                        tabla += `<td class='tabla-td'>${usuario[key]}</td>`;
                     }
                 }
                 tabla += "</tr>";
+                if (i === 9) {
+                    break;
+                }
             }
             tabla += "</tbody></table>";
             return tabla;

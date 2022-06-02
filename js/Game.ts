@@ -230,8 +230,8 @@ function terminarNivel() {
   plusPuntuacion = 1;
   clearInterval(idInterval);
   tiempoNivel = contenedorCronometro.textContent;
-  usuarioJson.puntajes[0] = puntuacionNivel;
-  usuarioJson.tiempos[0] = tiempoNivel;
+  usuarioJson.puntaje = puntuacionNivel;
+  usuarioJson.tiempo = tiempoNivel;
   Archivo.Ajax.guardarUsuario(usuarioJson);
   Archivo.Ajax.guardarPuntaje(usuarioJson);
 }
@@ -333,7 +333,9 @@ btnComenzar.addEventListener("click", (e: any) => {
 btnPuntajes.addEventListener("click", (e: any) => {
   dibujarModalPuntajes(armarVentanaModalPuntajes());
   Archivo.Ajax.listarPuntajes();
-  agregarClaseIdTabla();
+  setTimeout(() => {
+    agregarClaseIdTabla();
+  }, 10);
 });
 
 function agregarClaseIdTabla() {
